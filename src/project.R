@@ -1,42 +1,42 @@
 library(ggplot2)
 library(dplyr)
 
-setwd("C:/Users/ab/Desktop/hse/bioinf/project")
+setwd("C:/Users/ab/Documents/GitHub/recruit1337-atbogdanova_hse21_H3K27me3_G4_human/data")
 
-#1NAME <- 'H3K27me3_A549.ENCFF522WJJ.hg19'
-#2NAME <- 'H3K27me3_A549.ENCFF522WJJ.hg38'
-#3NAME <- 'H3K27me3_A549.ENCFF684ZZH.hg19'
-NAME <- 'H3K27me3_A549.ENCFF684ZZH.hg38'
+# https://bioconductor.org/packages/release/bioc/vignettes/ChIPpeakAnno/inst/doc/quickStart.html
+BiocManager::install("ChIPpeakAnno", force = TRUE)
+BiocManager::install("org.Hs.eg.db", force = TRUE)
+# BiocManager::install("org.Mm.eg.db")
 
-OUT_DIR <- 'Results/'
+library(ChIPpeakAnno)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(org.Hs.eg.db)
+#library(TxDb.Mmusculus.UCSC.mm10.knownGene)
+#library(org.Mm.eg.db)
 
-bed_df <- read.delim(paste0(NAME, '.bed'), as.is = TRUE, header = FALSE)
-colnames(bed_df) <- c('chrom', 'start', 'end', 'name', 'score')
-bed_df$len <- bed_df$end - bed_df$start
-head(bed_df)
+###
+DATA_DIR <- '../data/'
+OUT_DIR <- '../images/'
+peaks <- toGRanges(paste0(DATA_DIR, 'H3K27me3_A549.merge.hg19.intersect_with_gsm.bed'), format="BED")
+peaks[1:2]
 
-ggplot(bed_df) +
-  aes(x = len) +
-  geom_histogram() +
-  ggtitle(NAME, subtitle = sprintf('Number of peaks = %s', nrow(bed_df))) +
-  theme_bw()
-ggsave(paste0('len_hist.', NAME, '.pdf'), path = OUT_DIR)
+annoData <- toGRanges(TxDb.Hsapiens.UCSC.hg19.knownGene)
+annoData[1:2]
 
-bed_df <- bed_df %>%
-  arrange(-len) %>%
-  filter(len < 50000)
 
-head(bed_df)
+anno <- annotatePeakInBatch(peaks, AnnotationData=annoData, 
+                            output="overlapping", 
+                            FeatureLocForDistance="TSS",
+                            bindingRegion=c(-2000, 300))
+data.frame(anno) %>% head()
 
-ggplot(bed_df) +
-  aes(x = len) +
-  geom_histogram() +
-  ggtitle(NAME, subtitle = sprintf('Number of peaks = %s', nrow(bed_df))) +
-  theme_bw()
-ggsave(paste0('len_hist.', NAME, '.filtered.pdf'), path = OUT_DIR)
+anno$symbol <- xget(anno$feature, org.Hs.egSYMBOL)
+data.frame(anno) %>% head()
 
-bed_df %>%
-  select(-len) %>%
-  write.table(file='Results/H3K27me3_A549.ENCFF522WJJ.hg19.filtered.bed',
-              col.names = FALSE, row.names = FALSE, sep = '\t', quote = FALSE)
+anno_df <- data.frame(anno)
+write.table(anno_df, file=paste0(DATA_DIR, 'H3K4me3_A549.intersect_with_DeepZ.genes.txt'),
+            col.names = TRUE, row.names = FALSE, sep = '\t', quote = FALSE)
 
+uniq_genes_df <- unique(anno_df['symbol'])
+write.table(uniq_genes_df, file=paste0(DATA_DIR, 'H3K27me3_A549.merge.hg19.intersect_with_gsm.genes_uniq.txt'),
+            col.names = FALSE, row.names = FALSE, sep = '\t', quote = FALSE)
