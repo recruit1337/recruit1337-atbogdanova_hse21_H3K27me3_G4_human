@@ -3,6 +3,9 @@
 UCSC GenomeBrowser Session: 
 https://genome.ucsc.edu/s/nastya1829/h3k27me3a549
 
+Гугл-документ:
+https://docs.google.com/document/d/1t-H-oLBEKDvBY2f9V3m9JHgiAHScTQygeupGbslU7K4/edit
+
 ## Location of ChIP-seq peaks
 ![alt text](https://github.com/recruit1337/recruit1337-atbogdanova_hse21_H3K27me3_G4_human/blob/main/images/chip_seeker.H3K27me3_A549.ENCFF522WJJ.hg19.plotAnnoPie.png)
 ![alt text](https://github.com/recruit1337/recruit1337-atbogdanova_hse21_H3K27me3_G4_human/blob/main/images/chip_seeker.H3K27me3_A549.ENCFF684ZZH.hg19.plotAnnoPie.png)
